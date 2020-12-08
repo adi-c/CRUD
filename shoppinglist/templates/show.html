@@ -1,0 +1,41 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <title>Shopping List</title>  
+     {% load static %}  
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>  
+</head>  
+<body>  
+<table class="table table-striped table-bordered table-sm">  
+    <thead class="thead-dark">  
+    <tr>  
+        <th>ID</th>  
+        <th>Name</th>  
+        <th>Quantity</th>  
+        <th>Is Quantity in KGs?</th>  
+        <th>Price</th>  
+        <th>Actions</th>  
+    </tr>  
+    </thead>  
+    <tbody>  
+{% for item in items %}  
+    <tr>  
+        <td>{{ item.id }}</td>  
+        <td>{{ item.name }}</td>  
+        <td>{{ item.quantity }}</td>  
+        <td>{{ item.boolkg }}</td>  
+        <td>{{ item.price }}</td>  
+        <td>  
+            <a href="/edit/{{ item.id }}"><span class="glyphicon glyphicon-pencil" >Edit</span></a>  
+            <a href="/delete/{{ item.id }}">Delete</a>  
+        </td>  
+    </tr>  
+{% endfor %}  
+    </tbody>  
+</table>  
+<br>  
+<br>  
+<center><a href="/sitem" class="btn btn-primary">Add New Record</a></center>  
+</body>  
+</html>  
