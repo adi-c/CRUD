@@ -1,4 +1,4 @@
-inport os
+import os
 """
 Django settings for CRUD project.
 
