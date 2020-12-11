@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django
+  labels:
+    app: django
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django
+  template:
+    metadata:
+      labels:
+        app: django
+    spec:
+      containers:
+        - name: django
+          image: achirita/crud:latest
+          command: ["python", "./manage.py", "migrate"] # runs migrations and starts the server
+          command: ["python", "./manage.py", "makemigrations"]
+          command: ["python", "./manage.py", "runserver", "0.0.0.0:8000"]
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MYSQL_USER
+              value: root
+
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-creds
+                  key: ROOT_PASSWORD
+
+            - name: MYSQL_HOST
+              value: mysql-service
