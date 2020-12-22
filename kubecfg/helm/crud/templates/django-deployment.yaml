@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-django
+  labels:
+    app: {{ .Release.Name }}-django
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-django
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-django
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-django
+          image: {{ .Values.django.image.name }}:{{ .Values.django.image.version }}
+          command: ["/bin/sh","-c"]
+          args: ["python ./manage.py migrate && python ./manage.py makemigrations && python ./manage.py runserver 0.0.0.0:8000"]
+          ports:
+            - containerPort: {{ .Values.django.port }}
+          livenessProbe:
+             {{- toYaml .Values.django.livenessProbe | nindent 12 }}
+          env:
+            - name: MYSQL_USER
+              value: root
+
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mysql-creds
+                  key: ROOT_PASSWORD
+
+            - name: MYSQL_HOST
+              value: {{ .Release.Name }}-mysql-service

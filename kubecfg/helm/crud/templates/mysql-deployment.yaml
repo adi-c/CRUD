@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mysql
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-mysql
+    version: {{ quote .Values.mysql.image.version  }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-mysql
+      version: {{ quote .Values.mysql.image.version  }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-mysql
+        version: {{ quote .Values.mysql.image.version  }}
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-mysql
+          image: {{ .Values.mysql.image.name }}:{{ .Values.mysql.image.version }}
+          imagePullPolicy: {{ .Values.mysql.image.imagePullPolicy }}
+          livenessProbe:
+            {{- toYaml .Values.mysql.livenessProbe | nindent 12 }} 
+          ports:
+            - containerPort:  {{ .Values.mysql.port }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: {{ .Release.Name }}-mysql-storage
+              mountPath: "/var/lib/mysql"
+              subPath: "mysql" 
+            - name: {{ .Release.Name }}-mysql-conf-pv
+              mountPath: /etc/mysql/conf.d
+            - name: {{ .Release.Name }}-mysql-initdb
+              mountPath: /docker-entrypoint-initdb.d
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mysql-creds
+                  key: ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              value: {{ .Values.mysql.database }}
+      volumes:
+        - name: {{ .Release.Name }}-mysql-storage
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-mysql-storage
+        - name: {{ .Release.Name }}-mysql-conf-pv
+          configMap:
+            name: {{ .Release.Name }}-mysql
+        - name: {{ .Release.Name }}-mysql-initdb
+          configMap:
+            name: {{ .Release.Name }}-mysql-initdb

@@ -2,5 +2,5 @@
 .git
 .cache
 docker-compose.yml
-/kubeconfig/
-/kubeconfig/**/*
+/kubecfg/
+/kubecfg/**/*
